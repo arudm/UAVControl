@@ -2,7 +2,7 @@
 
 namespace UAVControl.Models
 {
-    public class PolylineItem
+    internal class PolylineItem
     {
         public LocationCollection Locations { get; set; }
     }
