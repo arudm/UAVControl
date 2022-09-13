@@ -1,11 +1,11 @@
 ﻿using MapControl;
 using System.Collections.Generic;
 using UAVControl.Models;
-
+using UAVControl.ViewModels.Base;
 
 namespace UAVControl.ViewModels
 {
-    public class MainWindowViewModel
+    internal class MainWindowViewModel : ViewModel
     {
         public List<PointItem> Points { get; } = new List<PointItem>();
         public List<PointItem> Pushpins { get; } = new List<PointItem>();
