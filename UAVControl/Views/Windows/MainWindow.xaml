@@ -4,21 +4,45 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:UAVControl.ViewModels"
+        xmlns:m="clr-namespace:UAVControl.Models"
         xmlns:map="clr-namespace:MapControl;assembly=MapControl.WPF"
+        xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
+        xmlns:b="clr-namespace:UAVControl.Behaviors"
         Title="MainWindow" 
         Height="450" Width="800">
-    
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../../Resources/DataTemplates/MapLayers.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <DataTemplate DataType="{x:Type m:PolylineItem}">
+                <map:MapPolyline Locations="{Binding Locations}" Stroke="Red" StrokeThickness="3"/>
+            </DataTemplate>
+        </ResourceDictionary>
+    </Window.Resources>
+
     <Window.DataContext>
         <vm:MainWindowViewModel/>
     </Window.DataContext>
-    
-    <Grid>  
-        <map:Map ZoomLevel="10" MaxZoomLevel="21" Center="45.03,41.96">
+
+    <Grid>
+        <map:Map x:Name="map" ZoomLevel="10" MaxZoomLevel="21" Center="45.03,41.96">
             <map:MapScale Margin="4" Opacity="0.5" Background="Transparent" VerticalAlignment="Bottom"/>
             <map:MapGraticule Opacity="0.3" Background="Transparent"/>
             <map:Map.MapLayer>
                 <map:MapTileLayer TileSource="https://{c}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png"/>
             </map:Map.MapLayer>
+            <i:Interaction.Behaviors>
+                <b:MapMouseMoveBehavior/>
+            </i:Interaction.Behaviors>
         </map:Map>
+
+        <m:OutlinedText
+            x:Name="mouseLocation" Margin="4" FontFamily="Consolas"
+            Background="{Binding Background, ElementName=map}"
+            Foreground="{Binding Foreground, ElementName=map}"
+            HorizontalAlignment="Center" VerticalAlignment="Top"
+            IsHitTestVisible="False"/>
     </Grid>
 </Window>

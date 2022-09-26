@@ -1,5 +1,10 @@
 ﻿using MapControl;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Windows;
+using System.Windows.Input;
+using UAVControl.Commands;
 using UAVControl.Models;
 using UAVControl.ViewModels.Base;
 
@@ -7,12 +12,25 @@ namespace UAVControl.ViewModels
 {
     internal class MainWindowViewModel : ViewModel
     {
+        //-------------------------------------------------------------------------
+        #region Команды
+
+        
+
+        #endregion
+        //-------------------------------------------------------------------------
+
         public List<PointItem> Points { get; } = new List<PointItem>();
         public List<PointItem> Pushpins { get; } = new List<PointItem>();
         public List<PolylineItem> Polylines { get; } = new List<PolylineItem>();
 
         public MainWindowViewModel()
         {
+
+            #region Команды 
+
+            #endregion
+
             Points.Add(new PointItem
             {
                 Name = "Steinbake Leitdamm",
