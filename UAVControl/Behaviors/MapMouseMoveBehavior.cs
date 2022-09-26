@@ -22,12 +22,15 @@ namespace UAVControl.Behaviors
         protected override void OnAttached()
         {
             AssociatedObject.MouseMove += MouseMove;
+            AssociatedObject.MouseLeave += MouseLeave;
         }
 
         protected override void OnDetaching()
         {
             AssociatedObject.MouseMove -= MouseMove;
+            AssociatedObject.MouseLeave -= MouseLeave;
         }
+
         private void MouseMove(object sender, MouseEventArgs e)
         {
             _map = AssociatedObject;
@@ -63,6 +66,12 @@ namespace UAVControl.Behaviors
             {
                 _mouseLocation.Text = string.Empty;
             }
+        }
+
+        private void MouseLeave(object sender, MouseEventArgs e)
+        {
+            _mouseLocation = FindVisualRootforOutlinedText(AssociatedObject) as OutlinedText;
+            _mouseLocation.Text = string.Empty;
         }
 
         private static DependencyObject FindVisualRootforOutlinedText(DependencyObject obj)
