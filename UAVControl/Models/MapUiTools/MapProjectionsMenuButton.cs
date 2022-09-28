@@ -1,3 +1,4 @@
+using MapControl;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
@@ -12,7 +13,7 @@ using System.Windows;
 using System.Windows.Markup;
 #endif
 
-namespace MapControl.UiTools
+namespace UAVControl.Models.MapUiTools
 {
 #if WINUI || UWP
     [ContentProperty(Name = nameof(Projection))]

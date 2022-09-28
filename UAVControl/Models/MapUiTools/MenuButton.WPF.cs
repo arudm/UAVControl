@@ -3,7 +3,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace MapControl.UiTools
+namespace UAVControl.Models.MapUiTools
 {
     public class MenuButton : Button
     {

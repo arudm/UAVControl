@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using MapControl;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
 #if WINUI
@@ -12,7 +13,7 @@ using System.Windows;
 using System.Windows.Markup;
 #endif
 
-namespace MapControl.UiTools
+namespace UAVControl.Models.MapUiTools
 {
 #if WINUI || UWP
     [ContentProperty(Name = nameof(Layer))]

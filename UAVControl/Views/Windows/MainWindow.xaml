@@ -6,10 +6,9 @@
         xmlns:vm="clr-namespace:UAVControl.ViewModels"
         xmlns:m="clr-namespace:UAVControl.Models"
         xmlns:map="clr-namespace:MapControl;assembly=MapControl.WPF"
-        xmlns:tools="clr-namespace:MapControl.UiTools"
+        xmlns:tools="clr-namespace:UAVControl.Models.MapUiTools"
         xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
         xmlns:b="clr-namespace:UAVControl.Behaviors"
-        xmlns:p="clr-namespace:UAVControl.Behaviors.Properties"
         Title="UAVControl" 
         Height="450" Width="800"
         Stylus.IsPressAndHoldEnabled="False">
