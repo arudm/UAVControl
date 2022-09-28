@@ -12,17 +12,17 @@
         Title="UAVControl" 
         Height="450" Width="800"
         Stylus.IsPressAndHoldEnabled="False">
+    
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="../../Resources/DataTemplates/MapLayers.xaml"/>
                 <ResourceDictionary Source="../../Resources/DataTemplates/PolylineItemDataTemplate.xaml"/>
-                
+
                 <ResourceDictionary Source="../../Resources/Styles/MenuButtonStyle.xaml"/>
                 <ResourceDictionary Source="../../Resources/Styles/PointItemStyle.xaml"/>
                 <ResourceDictionary Source="../../Resources/Styles/PushpinItemStyle.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-
         </ResourceDictionary>
     </Window.Resources>
 
@@ -91,7 +91,7 @@
             <TextBlock Margin="4,2" FontSize="10" m:HyperlinkText.InlinesSource="{Binding Description}"/>
         </StackPanel>
 
-        <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Margin="6,10,0,0" Height="220">
+        <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Margin="6,10,0,0" Height="256">
             <tools:MapLayersMenuButton x:Name="mapLayersMenuButton" Style="{StaticResource MenuButtonStyle}"
                 Margin="2" ToolTip="Map Layers and Overlays"
                 Map="{Binding ElementName=map}">
@@ -135,6 +135,9 @@
                         </Style.Triggers>
                     </Style>
                 </Button.Style>
+                <i:Interaction.Behaviors>
+                    <b:ResetHeadingBehavior/>
+                </i:Interaction.Behaviors>
             </Button>
         </StackPanel>
     </Grid>
