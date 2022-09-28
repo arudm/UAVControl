@@ -3,11 +3,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:map="clr-namespace:MapControl;assembly=MapControl.WPF">
     <map:MapTileLayer
-        x:Key="OpenStreetMap"
-        TileSource="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-        SourceName="OpenStreetMap"
-        Description="© [OpenStreetMap contributors](http://www.openstreetmap.org/copyright)"/>
-    <map:MapTileLayer
         x:Key="OpenStreetMapGerman"
         TileSource="https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png"
         SourceName="OpenStreetMap German"
@@ -47,15 +42,6 @@
         Description="© [Microsoft](http://www.bing.com/maps/)"
         MapBackground="Black"
         MapForeground="White"/>
-    <map:WmtsTileLayer
-        x:Key="TopPlusOpenWMTS"
-        CapabilitiesUri="https://sgx.geodatenzentrum.de/wmts_topplus_open/1.0.0/WMTSCapabilities.xml"
-        SourceName="TopPlusOpen"
-        Description="© [BKG](https://gdz.bkg.bund.de/index.php/default/webdienste/topplus-produkte/wmts-topplusopen-wmts-topplus-open.html)"/>
-    <map:WmsImageLayer
-        x:Key="TopPlusOpenWMS"
-        ServiceUri="https://sgx.geodatenzentrum.de/wms_topplus_open"
-        Description="© [BKG](https://gdz.bkg.bund.de/index.php/default/webdienste/topplus-produkte/wms-topplusopen-mit-layer-fur-normalausgabe-und-druck-wms-topplus-open.html)"/>
     <map:WmsImageLayer
         x:Key="OpenStreetMapWMS"
         ServiceUri="http://ows.terrestris.de/osm/service"

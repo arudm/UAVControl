@@ -6,107 +6,26 @@
         xmlns:vm="clr-namespace:UAVControl.ViewModels"
         xmlns:m="clr-namespace:UAVControl.Models"
         xmlns:map="clr-namespace:MapControl;assembly=MapControl.WPF"
+        xmlns:tools="clr-namespace:MapControl.UiTools"
         xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
         xmlns:b="clr-namespace:UAVControl.Behaviors"
         xmlns:p="clr-namespace:UAVControl.Behaviors.Properties"
         Title="MainWindow" 
-        Height="450" Width="800">
+        Height="450" Width="800"
+        Stylus.IsPressAndHoldEnabled="False">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="../../Resources/DataTemplates/MapLayers.xaml"/>
+                <ResourceDictionary Source="../../Resources/Styles/MenuButtonStyle.xaml"/>
+                <ResourceDictionary Source="../../Resources/Styles/PointItemStyle.xaml"/>
+                <ResourceDictionary Source="../../Resources/Styles/PushpinItemStyle.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-            <b:MapItemTouchDownBehavior x:Key="MapItemTouchDownBehavior"/>
-            
             <DataTemplate DataType="{x:Type m:PolylineItem}">
                 <map:MapPolyline Locations="{Binding Locations}" Stroke="Red" StrokeThickness="3"/>
             </DataTemplate>
-            <Style x:Key="PointItemStyle" TargetType="map:MapItem">
-                <Setter Property="p:MapItemTouchDownProperty.TouchDownBehavior" Value="{StaticResource MapItemTouchDownBehavior}"/>
-                <!--<EventSetter Event="TouchDown" Handler="MapItemTouchDown"/>-->
-                <Setter Property="AutoCollapse" Value="True"/>
-                <Setter Property="Location" Value="{Binding Location}"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="map:MapItem">
-                            <Canvas>
-                                <VisualStateManager.VisualStateGroups>
-                                    <VisualStateGroup x:Name="CommonStates">
-                                        <VisualState x:Name="Normal"/>
-                                        <VisualState x:Name="Disabled"/>
-                                        <VisualState x:Name="MouseOver">
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetName="hoverPath"
-                                                                 Storyboard.TargetProperty="Opacity"
-                                                                 To="0.7" Duration="0:0:0.1"/>
-                                            </Storyboard>
-                                        </VisualState>
-                                    </VisualStateGroup>
-                                    <VisualStateGroup x:Name="SelectionStates">
-                                        <VisualState x:Name="Unselected"/>
-                                        <VisualState x:Name="Selected">
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetName="selectedPath"
-                                                                 Storyboard.TargetProperty="Opacity"
-                                                                 To="0.7" Duration="0:0:0.1"/>
-                                            </Storyboard>
-                                        </VisualState>
-                                    </VisualStateGroup>
-                                </VisualStateManager.VisualStateGroups>
-                                <Path x:Name="selectedPath" Fill="White" Opacity="0">
-                                    <Path.Data>
-                                        <EllipseGeometry RadiusX="12" RadiusY="12"/>
-                                    </Path.Data>
-                                </Path>
-                                <Path x:Name="hoverPath" StrokeThickness="6" Stroke="White" Opacity="0">
-                                    <Path.Data>
-                                        <EllipseGeometry RadiusX="8" RadiusY="8"/>
-                                    </Path.Data>
-                                </Path>
-                                <Path StrokeThickness="2" Stroke="Gray" Fill="Transparent">
-                                    <Path.Data>
-                                        <EllipseGeometry RadiusX="8" RadiusY="8"/>
-                                    </Path.Data>
-                                </Path>
-                                <Grid Canvas.Left="15" Canvas.Top="-8">
-                                    <m:OutlinedText Margin="1" OutlineThickness="1.5" Text="{Binding Name}"
-                                                        Background="{Binding Background, RelativeSource={RelativeSource AncestorType=map:MapBase}}"/>
-                                </Grid>
-                            </Canvas>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-                <Style.Triggers>
-                    <Trigger Property="IsSelected" Value="True">
-                        <Setter Property="Panel.ZIndex" Value="1"/>
-                    </Trigger>
-                </Style.Triggers>
-            </Style>
 
-            <Style x:Key="PushpinItemStyle" TargetType="map:MapItem">
-                <Setter Property="p:MapItemTouchDownProperty.TouchDownBehavior" Value="{StaticResource MapItemTouchDownBehavior}"/>
-                <!--<EventSetter Event="TouchDown" Handler="MapItemTouchDown"/>-->
-                
-                <Setter Property="AutoCollapse" Value="True"/>
-                <Setter Property="Location" Value="{Binding Location}"/>
-                <Setter Property="HorizontalAlignment" Value="Center"/>
-                <Setter Property="VerticalAlignment" Value="Bottom"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="map:MapItem">
-                            <map:Pushpin Content="{Binding Name}"
-                                         HorizontalAlignment="{TemplateBinding HorizontalAlignment}"/>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-                <Style.Triggers>
-                    <Trigger Property="IsSelected" Value="True">
-                        <Setter Property="Panel.ZIndex" Value="1"/>
-                        <Setter Property="Foreground" Value="OrangeRed"/>
-                    </Trigger>
-                </Style.Triggers>
-            </Style>
         </ResourceDictionary>
     </Window.Resources>
 
@@ -115,8 +34,11 @@
     </Window.DataContext>
 
     <Grid>
-        <map:Map x:Name="map" ZoomLevel="10" MaxZoomLevel="21" Center="45.03,41.96">
-            
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="799*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <map:Map x:Name="map" ZoomLevel="10" MaxZoomLevel="21" Center="45.03,41.96" Grid.ColumnSpan="2">
             <map:MapItemsControl ItemsSource="{Binding Polylines}"/>
 
             <map:MapItemsControl ItemsSource="{Binding Points}"
@@ -125,23 +47,98 @@
 
             <map:MapItemsControl ItemsSource="{Binding Pushpins}"
                                  ItemContainerStyle="{StaticResource PushpinItemStyle}"/>
-            
-            <map:MapScale Margin="4" Opacity="0.5" Background="Transparent" VerticalAlignment="Bottom"/>
-            <map:MapGraticule Opacity="0.3" Background="Transparent"/>
-            <map:Map.MapLayer>
-                <map:MapTileLayer TileSource="https://{c}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png"/>
-            </map:Map.MapLayer>
+
+            <map:Pushpin AutoCollapse="True" Location="65,-18" Content="Iceland"/>
+            <map:Pushpin AutoCollapse="True" Location="71,25" Content="Norway"/>
+            <map:Pushpin AutoCollapse="True" Location="35,33" Content="Cyprus"/>
+            <map:Pushpin AutoCollapse="True" Location="28.25,-16.5" Content="Tenerife"/>
+
+            <map:MapPath Location="53.5,8.2" Stroke="Blue" StrokeThickness="3" Fill="#1F007F00">
+                <map:MapPath.Data>
+                    <EllipseGeometry RadiusX="1852" RadiusY="1852"/>
+                </map:MapPath.Data>
+            </map:MapPath>
+
+            <map:Pushpin AutoCollapse="True" Location="53.5,8.2" Content="N 53°30' E 8°12'"/>
 
             <i:Interaction.Behaviors>
                 <b:MapMouseMoveBehavior/>
             </i:Interaction.Behaviors>
         </map:Map>
-        
+
         <m:OutlinedText
-            x:Name="mouseLocation" Margin="4" FontFamily="Consolas"
+            x:Name="mouseLocation" Margin="0,4,0,0" FontFamily="Consolas"
             Background="{Binding Background, ElementName=map}"
             Foreground="{Binding Foreground, ElementName=map}"
             HorizontalAlignment="Center" VerticalAlignment="Top"
             IsHitTestVisible="False"/>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Background="#AFFFFFFF"
+                    DataContext="{Binding MapLayer, ElementName=map}" Grid.ColumnSpan="2">
+            <ProgressBar Width="100" Height="8" Margin="4,2" VerticalAlignment="Center"
+                         Maximum="1" Value="{Binding LoadingProgress}">
+                <ProgressBar.Style>
+                    <Style TargetType="ProgressBar">
+                        <Style.Triggers>
+                            <Trigger Property="Value" Value="0">
+                                <Setter Property="IsIndeterminate" Value="True"/>
+                            </Trigger>
+                            <Trigger Property="Value" Value="1">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ProgressBar.Style>
+            </ProgressBar>
+
+            <TextBlock Margin="4,2" FontSize="10" m:HyperlinkText.InlinesSource="{Binding Description}"/>
+        </StackPanel>
+
+        <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Margin="6,10,0,0" Height="220">
+            <tools:MapLayersMenuButton x:Name="mapLayersMenuButton" Style="{StaticResource MenuButtonStyle}"
+                Margin="2" ToolTip="Map Layers and Overlays"
+                Map="{Binding ElementName=map}">
+                <tools:MapLayerItem Text="OpenStreetMap German" Layer="{StaticResource OpenStreetMapGerman}"/>
+                <tools:MapLayerItem Text="OpenStreetMap French" Layer="{StaticResource OpenStreetMapFrench}"/>
+                <tools:MapLayerItem Text="OpenTopoMap" Layer="{StaticResource OpenTopoMap}"/>
+                <tools:MapLayerItem Text="OpenStreetMap WMS" Layer="{StaticResource OpenStreetMapWMS}"/>
+                <tools:MapLayersMenuButton.MapOverlays>
+                    <tools:MapLayerItem Text="Seamarks" Layer="{StaticResource Seamarks}"/>
+                    <tools:MapLayerItem Text="Graticule">
+                        <map:MapGraticule Opacity="0.7"/>
+                    </tools:MapLayerItem>
+                    <tools:MapLayerItem Text="Scale">
+                        <map:MapScale HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
+                    </tools:MapLayerItem>
+                </tools:MapLayersMenuButton.MapOverlays>
+            </tools:MapLayersMenuButton>
+
+            <tools:MapProjectionsMenuButton x:Name="mapProjectionsMenuButton" Style="{StaticResource MenuButtonStyle}"
+                Margin="2" ToolTip="Map Projections"
+                Map="{Binding ElementName=map}">
+                <tools:MapProjectionItem Text="Web Mercator" Projection="EPSG:3857"/>
+                <tools:MapProjectionItem Text="Equirectangular" Projection="EPSG:4326"/>
+            </tools:MapProjectionsMenuButton>
+
+            <Slider Orientation="Vertical" Margin="8" Height="100"
+                    Minimum="{Binding MinZoomLevel, ElementName=map}"
+                    Maximum="{Binding MaxZoomLevel, ElementName=map}"
+                    Value="{Binding TargetZoomLevel, ElementName=map}"
+                    SmallChange="0.1"
+                    AutoToolTipPlacement="BottomRight" AutoToolTipPrecision="0"/>
+
+            <Button Margin="2" Padding="8" ToolTip="Reset Heading"
+                    FontSize="20" FontFamily="Segoe MDL2 Assets" Content="&#xEBE6;">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Heading, ElementName=map}" Value="0">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+        </StackPanel>
     </Grid>
 </Window>
