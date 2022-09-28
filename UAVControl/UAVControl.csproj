@@ -17,6 +17,7 @@
     <Folder Include="Resources\" />
     <Folder Include="Services\" />
     <Folder Include="Views\" />
+    <Folder Include="Properties\" />
   </ItemGroup>
 
 </Project>
