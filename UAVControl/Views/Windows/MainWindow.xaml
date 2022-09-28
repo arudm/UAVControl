@@ -10,21 +10,19 @@
         xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
         xmlns:b="clr-namespace:UAVControl.Behaviors"
         xmlns:p="clr-namespace:UAVControl.Behaviors.Properties"
-        Title="MainWindow" 
+        Title="UAVControl" 
         Height="450" Width="800"
         Stylus.IsPressAndHoldEnabled="False">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="../../Resources/DataTemplates/MapLayers.xaml"/>
+                <ResourceDictionary Source="../../Resources/DataTemplates/PolylineItemDataTemplate.xaml"/>
+                
                 <ResourceDictionary Source="../../Resources/Styles/MenuButtonStyle.xaml"/>
                 <ResourceDictionary Source="../../Resources/Styles/PointItemStyle.xaml"/>
                 <ResourceDictionary Source="../../Resources/Styles/PushpinItemStyle.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-
-            <DataTemplate DataType="{x:Type m:PolylineItem}">
-                <map:MapPolyline Locations="{Binding Locations}" Stroke="Red" StrokeThickness="3"/>
-            </DataTemplate>
 
         </ResourceDictionary>
     </Window.Resources>
