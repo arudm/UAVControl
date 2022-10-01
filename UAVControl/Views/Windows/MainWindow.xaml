@@ -12,7 +12,7 @@
         Title="UAVControl" 
         Height="450" Width="800"
         Stylus.IsPressAndHoldEnabled="False">
-    
+
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -30,115 +30,123 @@
         <vm:MainWindowViewModel/>
     </Window.DataContext>
 
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="799*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-        <map:Map x:Name="map" ZoomLevel="10" MaxZoomLevel="21" Center="45.03,41.96" Grid.ColumnSpan="2">
-            <map:MapItemsControl ItemsSource="{Binding Polylines}"/>
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="Подключиться к UDP"></MenuItem>
+        </Menu>
+        <StatusBar DockPanel.Dock="Bottom"></StatusBar>
+        <TabControl>
+            <TabItem Header="Карта">
+                <Grid>
+                    <map:Map x:Name="map" ZoomLevel="10" MaxZoomLevel="21" Center="45.03,41.96" Grid.ColumnSpan="2">
+                        <map:MapItemsControl ItemsSource="{Binding Polylines}"/>
 
-            <map:MapItemsControl ItemsSource="{Binding Points}"
+                        <map:MapItemsControl ItemsSource="{Binding Points}"
                                  ItemContainerStyle="{StaticResource PointItemStyle}"
                                  SelectionMode="Extended"/>
 
-            <map:MapItemsControl ItemsSource="{Binding Pushpins}"
+                        <map:MapItemsControl ItemsSource="{Binding Pushpins}"
                                  ItemContainerStyle="{StaticResource PushpinItemStyle}"/>
 
-            <map:Pushpin AutoCollapse="True" Location="65,-18" Content="Iceland"/>
-            <map:Pushpin AutoCollapse="True" Location="71,25" Content="Norway"/>
-            <map:Pushpin AutoCollapse="True" Location="35,33" Content="Cyprus"/>
-            <map:Pushpin AutoCollapse="True" Location="28.25,-16.5" Content="Tenerife"/>
+                        <map:Pushpin AutoCollapse="True" Location="65,-18" Content="Iceland"/>
+                        <map:Pushpin AutoCollapse="True" Location="71,25" Content="Norway"/>
+                        <map:Pushpin AutoCollapse="True" Location="35,33" Content="Cyprus"/>
+                        <map:Pushpin AutoCollapse="True" Location="28.25,-16.5" Content="Tenerife"/>
 
-            <map:MapPath Location="53.5,8.2" Stroke="Blue" StrokeThickness="3" Fill="#1F007F00">
-                <map:MapPath.Data>
-                    <EllipseGeometry RadiusX="1852" RadiusY="1852"/>
-                </map:MapPath.Data>
-            </map:MapPath>
+                        <map:MapPath Location="53.5,8.2" Stroke="Blue" StrokeThickness="3" Fill="#1F007F00">
+                            <map:MapPath.Data>
+                                <EllipseGeometry RadiusX="1852" RadiusY="1852"/>
+                            </map:MapPath.Data>
+                        </map:MapPath>
 
-            <map:Pushpin AutoCollapse="True" Location="53.5,8.2" Content="N 53°30' E 8°12'"/>
+                        <map:Pushpin AutoCollapse="True" Location="53.5,8.2" Content="N 53°30' E 8°12'"/>
 
-            <i:Interaction.Behaviors>
-                <b:MapMouseMoveBehavior/>
-            </i:Interaction.Behaviors>
-        </map:Map>
+                        <i:Interaction.Behaviors>
+                            <b:MapMouseMoveBehavior/>
+                        </i:Interaction.Behaviors>
+                    </map:Map>
 
-        <m:OutlinedText
+                    <m:OutlinedText
             x:Name="mouseLocation" Margin="0,4,0,0" FontFamily="Consolas"
             Background="{Binding Background, ElementName=map}"
             Foreground="{Binding Foreground, ElementName=map}"
             HorizontalAlignment="Center" VerticalAlignment="Top"
             IsHitTestVisible="False"/>
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Background="#AFFFFFFF"
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Background="#AFFFFFFF"
                     DataContext="{Binding MapLayer, ElementName=map}" Grid.ColumnSpan="2">
-            <ProgressBar Width="100" Height="8" Margin="4,2" VerticalAlignment="Center"
+                        <ProgressBar Width="100" Height="8" Margin="4,2" VerticalAlignment="Center"
                          Maximum="1" Value="{Binding LoadingProgress}">
-                <ProgressBar.Style>
-                    <Style TargetType="ProgressBar">
-                        <Style.Triggers>
-                            <Trigger Property="Value" Value="0">
-                                <Setter Property="IsIndeterminate" Value="True"/>
-                            </Trigger>
-                            <Trigger Property="Value" Value="1">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </ProgressBar.Style>
-            </ProgressBar>
+                            <ProgressBar.Style>
+                                <Style TargetType="ProgressBar">
+                                    <Style.Triggers>
+                                        <Trigger Property="Value" Value="0">
+                                            <Setter Property="IsIndeterminate" Value="True"/>
+                                        </Trigger>
+                                        <Trigger Property="Value" Value="1">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ProgressBar.Style>
+                        </ProgressBar>
 
-            <TextBlock Margin="4,2" FontSize="10" m:HyperlinkText.InlinesSource="{Binding Description}"/>
-        </StackPanel>
+                        <TextBlock Margin="4,2" FontSize="10" m:HyperlinkText.InlinesSource="{Binding Description}"/>
+                    </StackPanel>
 
-        <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Margin="6,10,0,0" Height="256">
-            <tools:MapLayersMenuButton x:Name="mapLayersMenuButton" Style="{StaticResource MenuButtonStyle}"
+                    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Margin="6,10,0,0">
+                        <tools:MapLayersMenuButton x:Name="mapLayersMenuButton" Style="{StaticResource MenuButtonStyle}"
                 Margin="2" ToolTip="Map Layers and Overlays"
                 Map="{Binding ElementName=map}">
-                <tools:MapLayerItem Text="OpenStreetMap German" Layer="{StaticResource OpenStreetMapGerman}"/>
-                <tools:MapLayerItem Text="OpenStreetMap French" Layer="{StaticResource OpenStreetMapFrench}"/>
-                <tools:MapLayerItem Text="OpenTopoMap" Layer="{StaticResource OpenTopoMap}"/>
-                <tools:MapLayerItem Text="OpenStreetMap WMS" Layer="{StaticResource OpenStreetMapWMS}"/>
-                <tools:MapLayersMenuButton.MapOverlays>
-                    <tools:MapLayerItem Text="Seamarks" Layer="{StaticResource Seamarks}"/>
-                    <tools:MapLayerItem Text="Graticule">
-                        <map:MapGraticule Opacity="0.7"/>
-                    </tools:MapLayerItem>
-                    <tools:MapLayerItem Text="Scale">
-                        <map:MapScale HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
-                    </tools:MapLayerItem>
-                </tools:MapLayersMenuButton.MapOverlays>
-            </tools:MapLayersMenuButton>
+                            <tools:MapLayerItem Text="OpenStreetMap German" Layer="{StaticResource OpenStreetMapGerman}"/>
+                            <tools:MapLayerItem Text="OpenStreetMap French" Layer="{StaticResource OpenStreetMapFrench}"/>
+                            <tools:MapLayerItem Text="OpenTopoMap" Layer="{StaticResource OpenTopoMap}"/>
+                            <tools:MapLayerItem Text="OpenStreetMap WMS" Layer="{StaticResource OpenStreetMapWMS}"/>
+                            <tools:MapLayersMenuButton.MapOverlays>
+                                <tools:MapLayerItem Text="Seamarks" Layer="{StaticResource Seamarks}"/>
+                                <tools:MapLayerItem Text="Graticule">
+                                    <map:MapGraticule Opacity="0.7"/>
+                                </tools:MapLayerItem>
+                                <tools:MapLayerItem Text="Scale">
+                                    <map:MapScale HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
+                                </tools:MapLayerItem>
+                            </tools:MapLayersMenuButton.MapOverlays>
+                        </tools:MapLayersMenuButton>
 
-            <tools:MapProjectionsMenuButton x:Name="mapProjectionsMenuButton" Style="{StaticResource MenuButtonStyle}"
+                        <tools:MapProjectionsMenuButton x:Name="mapProjectionsMenuButton" Style="{StaticResource MenuButtonStyle}"
                 Margin="2" ToolTip="Map Projections"
                 Map="{Binding ElementName=map}">
-                <tools:MapProjectionItem Text="Web Mercator" Projection="EPSG:3857"/>
-                <tools:MapProjectionItem Text="Equirectangular" Projection="EPSG:4326"/>
-            </tools:MapProjectionsMenuButton>
+                            <tools:MapProjectionItem Text="Web Mercator" Projection="EPSG:3857"/>
+                            <tools:MapProjectionItem Text="Equirectangular" Projection="EPSG:4326"/>
+                        </tools:MapProjectionsMenuButton>
 
-            <Slider Orientation="Vertical" Margin="8" Height="100"
+                        <Slider Orientation="Vertical" Margin="8" Height="100"
                     Minimum="{Binding MinZoomLevel, ElementName=map}"
                     Maximum="{Binding MaxZoomLevel, ElementName=map}"
                     Value="{Binding TargetZoomLevel, ElementName=map}"
                     SmallChange="0.1"
                     AutoToolTipPlacement="BottomRight" AutoToolTipPrecision="0"/>
 
-            <Button Margin="2" Padding="8" ToolTip="Reset Heading"
+                        <Button Margin="2" Padding="8" ToolTip="Reset Heading"
                     FontSize="20" FontFamily="Segoe MDL2 Assets" Content="&#xEBE6;">
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding Heading, ElementName=map}" Value="0">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-                <i:Interaction.Behaviors>
-                    <b:ResetHeadingBehavior/>
-                </i:Interaction.Behaviors>
-            </Button>
-        </StackPanel>
-    </Grid>
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Heading, ElementName=map}" Value="0">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <i:Interaction.Behaviors>
+                                <b:ResetHeadingBehavior/>
+                            </i:Interaction.Behaviors>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Телеметрия"></TabItem>
+        </TabControl>
+
+    </DockPanel>
 </Window>

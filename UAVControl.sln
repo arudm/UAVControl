@@ -5,7 +5,7 @@ VisualStudioVersion = 17.2.32802.462
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UAVControl", "UAVControl\UAVControl.csproj", "{BA7678F4-A2FF-4149-BF57-63F1C0C01312}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MapControl.WPF", "..\XAML-Map-Control-master\MapControl\WPF\MapControl.WPF.csproj", "{CE19C77C-15AF-405A-B1CE-2EE5F93AA59B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MapControl.WPF", "..\XAML-Map-Control-master\MapControl\WPF\MapControl.WPF.csproj", "{6DED1DA7-5998-46C0-AC55-F40AB05BD62A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{BA7678F4-A2FF-4149-BF57-63F1C0C01312}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA7678F4-A2FF-4149-BF57-63F1C0C01312}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA7678F4-A2FF-4149-BF57-63F1C0C01312}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CE19C77C-15AF-405A-B1CE-2EE5F93AA59B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CE19C77C-15AF-405A-B1CE-2EE5F93AA59B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CE19C77C-15AF-405A-B1CE-2EE5F93AA59B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CE19C77C-15AF-405A-B1CE-2EE5F93AA59B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6DED1DA7-5998-46C0-AC55-F40AB05BD62A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DED1DA7-5998-46C0-AC55-F40AB05BD62A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DED1DA7-5998-46C0-AC55-F40AB05BD62A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DED1DA7-5998-46C0-AC55-F40AB05BD62A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
