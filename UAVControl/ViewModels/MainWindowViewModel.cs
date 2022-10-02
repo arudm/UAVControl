@@ -2,7 +2,9 @@
 using MapControl;
 using MissionPlanner;
 using MissionPlanner.ArduPilot;
+using MissionPlanner.Comms;
 using MissionPlanner.Utilities;
+using netDxf.Entities;
 using netDxf.Tables;
 using System;
 using System.Collections.Generic;
@@ -15,6 +17,7 @@ using System.Windows.Input;
 using UAVControl.Commands;
 using UAVControl.Models;
 using UAVControl.ViewModels.Base;
+using static alglib;
 using static System.CustomMessageBox;
 
 namespace UAVControl.ViewModels
@@ -30,12 +33,27 @@ namespace UAVControl.ViewModels
         //public MAVLink.MavlinkParse mavlink { get; set; } = new MAVLink.MavlinkParse();
         public string? TelemetryPacket { get; set; }
         public UdpSerial UdpSerial { get; set; } = new UdpSerial();
-        private DateTime Connecttime { get; set; }
+        public DateTime Connecttime { get; set; }
         public bool UseCachedParams { get; set; } = false;
+        ManualResetEvent SerialThreadrunner = new ManualResetEvent(false);
+
+        /// <summary>
+        /// store the time we first connect
+        /// </summary>
+        DateTime connecttime = DateTime.Now;
+
+        DateTime nodatawarning = DateTime.Now;
+        DateTime OpenTime = DateTime.Now;
+
+        /// <summary>
+        /// controls the main serial reader thread
+        /// </summary>
+        bool serialThread = false;
+
         /// <summary>
         /// Active Comport interface
         /// </summary>
-        public static MAVLinkInterface comPort
+        public MAVLinkInterface comPort
         {
             get { return _comPort; }
             set
@@ -50,9 +68,48 @@ namespace UAVControl.ViewModels
                  instance.comPort_MavChanged(null, null);*/
             }
         }
-        static MAVLinkInterface _comPort = new MAVLinkInterface();
+        private MAVLinkInterface _comPort = new MAVLinkInterface();
 
+        /// <summary>
+        /// speech engine enable
+        /// </summary>
+        public bool speechEnable
+        {
+            get { return speechEngine == null ? false : speechEngine.speechEnable; }
+            set
+            {
+                if (speechEngine != null) speechEngine.speechEnable = value;
+            }
+        }
 
+        public bool speech_armed_only = false;
+        public bool speechEnabled()
+        {
+            if (!speechEnable)
+            {
+                return false;
+            }
+            if (speech_armed_only)
+            {
+                return comPort.MAV.cs.armed;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// spech engine static class
+        /// </summary>
+        public  ISpeech speechEngine { get; set; }
+
+        /// <summary>
+        /// track the last heartbeat sent
+        /// </summary>
+        private DateTime heatbeatSend = DateTime.Now;
+
+        /// <summary>
+        /// passive comports
+        /// </summary>
+        public List<MAVLinkInterface> Comports = new List<MAVLinkInterface>();
 
 
         //-------------------------------------------------------------------------
@@ -114,6 +171,7 @@ namespace UAVControl.ViewModels
             else
             {
                 doConnect(comPort, "UDP", "115200");
+                Comports.Add(comPort);
             }
 
             //_connectionControl.UpdateSysIDS();
@@ -519,6 +577,520 @@ namespace UAVControl.ViewModels
                 return;
             }
         }
+        #endregion
+
+        #region LoadTelemetryCommand
+        public ICommand LoadTelemetryCommand { get; }
+
+        private bool CanLoadTelemetryCommandExecute(object p)
+        {
+            if (comPort.BaseStream.IsOpen) 
+                return true;
+            return false;
+        }
+        private void OnLoadTelemetryCommandExecuted(object p)
+        {
+            SerialReader();         
+        }
+
+        private async void SerialReader()
+        {
+            if (serialThread == true)
+                return;
+            serialThread = true;
+
+            SerialThreadrunner.Reset();
+
+            int minbytes = 10;
+
+            int altwarningmax = 0;
+
+            bool armedstatus = false;
+
+            string lastmessagehigh = "";
+
+            DateTime speechcustomtime = DateTime.Now;
+
+            DateTime speechlowspeedtime = DateTime.Now;
+
+            DateTime linkqualitytime = DateTime.Now;
+
+            while (serialThread)
+            {
+                try
+                {
+                    await Task.Delay(1).ConfigureAwait(false); // was 5
+
+                    try
+                    {
+                        TelemetryPacket = comPort.MAV.cs.yaw.ToString();
+                        /*
+                        if (ConfigTerminal.comPort is MAVLinkSerialPort)
+                        {
+                        }
+                        else
+                        {
+                            if (ConfigTerminal.comPort != null && ConfigTerminal.comPort.BaseStream.IsOpen)
+                                continue;
+                        }*/
+                    }
+                    catch (Exception ex)
+                    {
+                        log.Error(ex);
+                    }
+                    /*
+                    // update connect/disconnect button and info stats
+                    try
+                    {
+                        UpdateConnectIcon();
+                    }
+                    catch (Exception ex)
+                    {
+                        log.Error(ex);
+                    }
+                    */
+                    // 30 seconds interval speech options
+                    if (speechEnabled() && speechEngine != null && (DateTime.Now - speechcustomtime).TotalSeconds > 30 &&
+                        (comPort.logreadmode || comPort.BaseStream.IsOpen))
+                    {
+                        if (speechEngine.IsReady)
+                        {
+                            if (Settings.Instance.GetBoolean("speechcustomenabled"))
+                            {
+                                speechEngine.SpeakAsync(Common.speechConversion(comPort.MAV,
+                                    "" + Settings.Instance["speechcustom"]));
+                            }
+
+                            speechcustomtime = DateTime.Now;
+                        }
+
+                        // speech for battery alerts
+                        //speechbatteryvolt
+                        float warnvolt = Settings.Instance.GetFloat("speechbatteryvolt");
+                        float warnpercent = Settings.Instance.GetFloat("speechbatterypercent");
+
+                        if (Settings.Instance.GetBoolean("speechbatteryenabled") == true &&
+                            comPort.MAV.cs.battery_voltage <= warnvolt &&
+                            comPort.MAV.cs.battery_voltage >= 5.0)
+                        {
+                            if (speechEngine.IsReady)
+                            {
+                                speechEngine.SpeakAsync(Common.speechConversion(comPort.MAV,
+                                    "" + Settings.Instance["speechbattery"]));
+                            }
+                        }
+                        else if (Settings.Instance.GetBoolean("speechbatteryenabled") == true &&
+                                 (comPort.MAV.cs.battery_remaining) < warnpercent &&
+                        comPort.MAV.cs.battery_voltage >= 5.0 &&
+                                 comPort.MAV.cs.battery_remaining != 0.0)
+                        {
+                            if (speechEngine.IsReady)
+                            {
+                                speechEngine.SpeakAsync(
+                                    Common.speechConversion(comPort.MAV,
+                                        "" + Settings.Instance["speechbattery"]));
+                            }
+                        }
+                    }
+
+                    // speech for airspeed alerts
+                    if (speechEnabled() && speechEngine != null && (DateTime.Now - speechlowspeedtime).TotalSeconds > 10 &&
+                        (comPort.logreadmode || comPort.BaseStream.IsOpen))
+                    {
+                        if (Settings.Instance.GetBoolean("speechlowspeedenabled") == true &&
+                            comPort.MAV.cs.armed)
+                        {
+                            float warngroundspeed = Settings.Instance.GetFloat("speechlowgroundspeedtrigger");
+                            float warnairspeed = Settings.Instance.GetFloat("speechlowairspeedtrigger");
+
+                            if (comPort.MAV.cs.airspeed < warnairspeed)
+                            {
+                                if (speechEngine.IsReady)
+                                {
+                                    speechEngine.SpeakAsync(
+                                        Common.speechConversion(comPort.MAV,
+                                            "" + Settings.Instance["speechlowairspeed"]));
+                                    speechlowspeedtime = DateTime.Now;
+                                }
+                            }
+                            else if (comPort.MAV.cs.groundspeed < warngroundspeed)
+                            {
+                                if (speechEngine.IsReady)
+                                {
+                                    speechEngine.SpeakAsync(
+                                        Common.speechConversion(comPort.MAV,
+                                            "" + Settings.Instance["speechlowgroundspeed"]));
+                                    speechlowspeedtime = DateTime.Now;
+                                }
+                            }
+                            else
+                            {
+                                speechlowspeedtime = DateTime.Now;
+                            }
+                        }
+                    }
+
+                    // speech altitude warning - message high warning
+                    if (speechEnabled() && speechEngine != null &&
+                        (comPort.logreadmode || comPort.BaseStream.IsOpen))
+                    {
+                        float warnalt = float.MaxValue;
+                        if (Settings.Instance.ContainsKey("speechaltheight"))
+                        {
+                            warnalt = Settings.Instance.GetFloat("speechaltheight");
+                        }
+
+                        try
+                        {
+                            altwarningmax = (int)Math.Max(comPort.MAV.cs.alt, altwarningmax);
+
+                            if (Settings.Instance.GetBoolean("speechaltenabled") == true &&
+                            comPort.MAV.cs.alt != 0.00 &&
+                                (comPort.MAV.cs.alt <= warnalt) && comPort.MAV.cs.armed)
+                            {
+                                if (altwarningmax > warnalt)
+                                {
+                                    if (speechEngine.IsReady)
+                                        speechEngine.SpeakAsync(
+                                            Common.speechConversion(comPort.MAV,
+                                                "" + Settings.Instance["speechalt"]));
+                                }
+                            }
+                        }
+                        catch
+                        {
+                        } // silent fail
+
+
+                        try
+                        {
+                            // say the latest high priority message
+                            if (speechEngine.IsReady &&
+                                lastmessagehigh != comPort.MAV.cs.messageHigh &&
+                                comPort.MAV.cs.messageHigh != null)
+                            {
+                                if (!comPort.MAV.cs.messageHigh.StartsWith("PX4v2 "))
+                                {
+                                    speechEngine.SpeakAsync(comPort.MAV.cs.messageHigh);
+                                    lastmessagehigh = comPort.MAV.cs.messageHigh;
+                                }
+                            }
+                        }
+                        catch
+                        {
+                        }
+                    }
+
+                    // not doing anything
+                    if (!comPort.logreadmode && !comPort.BaseStream.IsOpen)
+                    {
+                        altwarningmax = 0;
+                    }
+
+                    // attenuate the link qualty over time
+                    if ((DateTime.Now - comPort.MAV.lastvalidpacket).TotalSeconds >= 1)
+                    {
+                        if (linkqualitytime.Second != DateTime.Now.Second)
+                        {
+                            comPort.MAV.cs.linkqualitygcs =
+                                (ushort)(comPort.MAV.cs.linkqualitygcs * 0.8f);
+                            linkqualitytime = DateTime.Now;
+                            /*
+                            // force redraw if there are no other packets are being read
+                            this.BeginInvokeIfRequired(
+                                (Action)
+                                delegate { GCSViews.FlightData.myhud.Invalidate(); });*/
+                        }
+                    }
+
+                    // data loss warning - wait min of 3 seconds, ignore first 30 seconds of connect, repeat at 5 seconds interval
+                    if ((DateTime.Now - comPort.MAV.lastvalidpacket).TotalSeconds > 3
+                        && (DateTime.Now - connecttime).TotalSeconds > 30
+                        && (DateTime.Now - nodatawarning).TotalSeconds > 5
+                        && (comPort.logreadmode || comPort.BaseStream.IsOpen)
+                        && comPort.MAV.cs.armed)
+                    {
+                        var msg = "WARNING No Data for " + (int)(DateTime.Now - comPort.MAV.lastvalidpacket).TotalSeconds + " Seconds";
+                        comPort.MAV.cs.messageHigh = msg;
+                        if (speechEnabled() && speechEngine != null)
+                        {
+                            if (speechEngine.IsReady)
+                            {
+                                speechEngine.SpeakAsync(msg);
+                                nodatawarning = DateTime.Now;
+                            }
+                        }
+                    }
+
+                    // get home point on armed status change.
+                    if (armedstatus != comPort.MAV.cs.armed && comPort.BaseStream.IsOpen)
+                    {
+                        armedstatus = comPort.MAV.cs.armed;
+                        // status just changed to armed
+                        if (comPort.MAV.cs.armed == true &&
+                            comPort.MAV.apname != MAVLink.MAV_AUTOPILOT.INVALID &&
+                            comPort.MAV.aptype != MAVLink.MAV_TYPE.GIMBAL)
+                        {
+                            System.Threading.ThreadPool.QueueUserWorkItem(state =>
+                            {
+                                Thread.CurrentThread.Name = "Arm State change";
+                                try
+                                {
+                                    while (comPort.giveComport == true)
+                                        Thread.Sleep(100);
+
+                                    comPort.MAV.cs.HomeLocation = new PointLatLngAlt(comPort.getWP(0));
+                                    /*if (MyView.current != null && MyView.current.Name == "FlightPlanner")
+                                    {
+                                        // update home if we are on flight data tab
+                                        this.BeginInvokeIfRequired((Action)delegate { FlightPlanner.updateHome(); });
+                                    }*/
+                                }
+                                catch
+                                {
+                                    // dont hang this loop
+                                    /*this.BeginInvokeIfRequired(
+                                        (Action)
+                                        delegate
+                                        {
+                                            CustomMessageBox.Show("Failed to update home location (" +
+                                                                  comPort.MAV.sysid + ")");
+                                        });*/
+                                }
+                            });
+                        }
+
+                        if (speechEnable && speechEngine != null)
+                        {
+                            if (Settings.Instance.GetBoolean("speecharmenabled"))
+                            {
+                                string speech = armedstatus
+                                    ? Settings.Instance["speecharm"]
+                                    : Settings.Instance["speechdisarm"];
+                                if (!string.IsNullOrEmpty(speech))
+                                {
+                                    speechEngine.SpeakAsync(
+                                        Common.speechConversion(comPort.MAV, speech));
+                                }
+                            }
+                        }
+                    }
+
+                    if (comPort.MAV.param.TotalReceived < comPort.MAV.param.TotalReported)
+                    {
+                        if (comPort.MAV.param.TotalReported > 0 && comPort.BaseStream.IsOpen)
+                        {
+                            /*this.BeginInvokeIfRequired(() =>
+                            {
+                                try
+                                {
+                                    instance.status1.Percent =
+                                        (comPort.MAV.param.TotalReceived / (double)comPort.MAV.param.TotalReported) *
+                                        100.0;
+                                }
+                                catch (Exception e)
+                                {
+                                    log.Error(e);
+                                }
+                            });*/
+                        }
+                    }
+
+                    // send a hb every seconds from gcs to ap
+                    if (heatbeatSend.Second != DateTime.Now.Second)
+                    {
+                        MAVLink.mavlink_heartbeat_t htb = new MAVLink.mavlink_heartbeat_t()
+                        {
+                            type = (byte)MAVLink.MAV_TYPE.GCS,
+                            autopilot = (byte)MAVLink.MAV_AUTOPILOT.INVALID,
+                            mavlink_version = 3 // MAVLink.MAVLINK_VERSION
+                        };
+
+                        // enumerate each link
+                        foreach (var port in Comports.ToArray())
+                        {
+                            if (!port.BaseStream.IsOpen)
+                                continue;
+
+                            // poll for params at heartbeat interval - primary mav on this port only
+                            if (!port.giveComport)
+                            {
+                                try
+                                {
+                                    // poll only when not armed
+                                    if (!port.MAV.cs.armed && DateTime.Now > connecttime.AddSeconds(60))
+                                    {
+                                        port.getParamPoll();
+                                        port.getParamPoll();
+                                    }
+                                }
+                                catch
+                                {
+                                }
+                            }
+
+                            // there are 3 hb types we can send, mavlink1, mavlink2 signed and unsigned
+                            bool sentsigned = false;
+                            bool sentmavlink1 = false;
+                            bool sentmavlink2 = false;
+
+                            // enumerate each mav
+                            foreach (var MAV in port.MAVlist)
+                            {
+                                try
+                                {
+                                    // poll for version if we dont have it - every mav every port
+                                    if (!port.giveComport && MAV.cs.capabilities == 0 &&
+                                        (DateTime.Now.Second % 20) == 0 && MAV.cs.version < new Version(0, 1))
+                                        port.getVersion(MAV.sysid, MAV.compid, false);
+
+                                    // are we talking to a mavlink2 device
+                                    if (MAV.mavlinkv2)
+                                    {
+                                        // is signing enabled
+                                        if (MAV.signing)
+                                        {
+                                            // check if we have already sent
+                                            if (sentsigned)
+                                                continue;
+                                            sentsigned = true;
+                                        }
+                                        else
+                                        {
+                                            // check if we have already sent
+                                            if (sentmavlink2)
+                                                continue;
+                                            sentmavlink2 = true;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // check if we have already sent
+                                        if (sentmavlink1)
+                                            continue;
+                                        sentmavlink1 = true;
+                                    }
+
+                                    port.sendPacket(htb, MAV.sysid, MAV.compid);
+                                }
+                                catch (Exception ex)
+                                {
+                                    log.Error(ex);
+                                    // close the bad port
+                                    try
+                                    {
+                                        port.Close();
+                                    }
+                                    catch
+                                    {
+                                    }
+
+                                    // refresh the screen if needed
+                                    if (port == comPort)
+                                    {
+                                        /*// refresh config window if needed
+                                        if (MyView.current != null)
+                                        {
+                                            this.BeginInvoke((MethodInvoker)delegate ()
+                                            {
+                                                if (MyView.current.Name == "HWConfig")
+                                                    MyView.ShowScreen("HWConfig");
+                                                if (MyView.current.Name == "SWConfig")
+                                                    MyView.ShowScreen("SWConfig");
+                                            });
+                                        }*/
+                                    }
+                                }
+                            }
+                        }
+
+                        heatbeatSend = DateTime.Now;
+                    }
+
+                    // if not connected or busy, sleep and loop
+                    if (!comPort.BaseStream.IsOpen || comPort.giveComport == true)
+                    {
+                        if (!comPort.BaseStream.IsOpen)
+                        {
+                            // check if other ports are still open
+                            foreach (var port in Comports)
+                            {
+                                if (port.BaseStream.IsOpen)
+                                {
+                                    Console.WriteLine("Main comport shut, swapping to other mav");
+                                    comPort = port;
+                                    break;
+                                }
+                            }
+                        }
+
+                        await Task.Delay(100).ConfigureAwait(false);
+                    }
+
+                    // read the interfaces
+                    foreach (var port in Comports.ToArray())
+                    {
+                        if (!port.BaseStream.IsOpen)
+                        {
+                            // skip primary interface
+                            if (port == comPort)
+                                continue;
+
+                            // modify array and drop out
+                            Comports.Remove(port);
+                            port.Dispose();
+                            break;
+                        }
+
+                        DateTime startread = DateTime.Now;
+
+                        // must be open, we have bytes, we are not yielding the port,
+                        // the thread is meant to be running and we only spend 1 seconds max in this read loop
+                        while (port.BaseStream.IsOpen && port.BaseStream.BytesToRead > minbytes &&
+                               port.giveComport == false && serialThread && startread.AddSeconds(1) > DateTime.Now)
+                        {
+                            try
+                            {
+                                await port.readPacketAsync().ConfigureAwait(false);
+                            }
+                            catch (Exception ex)
+                            {
+                                log.Error(ex);
+                            }
+                        }
+
+                        // update currentstate of sysids on the port
+                        foreach (var MAV in port.MAVlist)
+                        {
+                            try
+                            {
+                                MAV.cs.UpdateCurrentSettings(null, false, port, MAV);
+                            }
+                            catch (Exception ex)
+                            {
+                                log.Error(ex);
+                            }
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Tracking.AddException(e);
+                    log.Error("Serial Reader fail :" + e.ToString());
+                    try
+                    {
+                        comPort.Close();
+                    }
+                    catch (Exception ex)
+                    {
+                        log.Error(ex);
+                    }
+                }
+            }
+
+            Console.WriteLine("SerialReader Done");
+            SerialThreadrunner.Set();
+        }
 
         #endregion
 
@@ -531,8 +1103,10 @@ namespace UAVControl.ViewModels
             #region Команды 
 
             ConnectionUdpCommand = new LambdaCommand(OnConnectionUdpCommandExecuted, CanConnectionUdpCommandExecute);
-
+            LoadTelemetryCommand = new LambdaCommand(OnLoadTelemetryCommandExecuted, CanLoadTelemetryCommandExecute);
             #endregion
+
+            comPort.BaseStream = new SerialPort();
 
             Points.Add(new PointItem
             {
