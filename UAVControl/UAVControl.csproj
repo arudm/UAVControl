@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="log4net" Version="2.0.15" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
   </ItemGroup>
 
@@ -19,6 +20,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\MissionPlanner\ExtLibs\ArduPilot\MissionPlanner.ArduPilot.csproj" />
+    <ProjectReference Include="..\..\MissionPlanner\ExtLibs\Mavlink\MAVLink.csproj" />
+    <ProjectReference Include="..\..\MissionPlanner\ExtLibs\Utilities\MissionPlanner.Utilities.csproj" />
     <ProjectReference Include="..\..\XAML-Map-Control-master\MapControl\WPF\MapControl.WPF.csproj" />
   </ItemGroup>
 

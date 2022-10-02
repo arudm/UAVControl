@@ -9,6 +9,7 @@
         xmlns:tools="clr-namespace:UAVControl.Models.MapUiTools"
         xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
         xmlns:b="clr-namespace:UAVControl.Behaviors"
+        xmlns:cmd="clr-namespace:UAVControl.Infrastructure.Commands"
         Title="UAVControl" 
         Height="450" Width="800"
         Stylus.IsPressAndHoldEnabled="False">
@@ -23,6 +24,7 @@
                 <ResourceDictionary Source="../../Resources/Styles/PointItemStyle.xaml"/>
                 <ResourceDictionary Source="../../Resources/Styles/PushpinItemStyle.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
         </ResourceDictionary>
     </Window.Resources>
 
@@ -32,13 +34,18 @@
 
     <DockPanel>
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="Подключиться к UDP"></MenuItem>
+            <MenuItem Header="Connect/Disconnect" Command="{Binding ConnectionUdpCommand}"></MenuItem>
         </Menu>
         <StatusBar DockPanel.Dock="Bottom"></StatusBar>
         <TabControl>
             <TabItem Header="Карта">
                 <Grid>
-                    <map:Map x:Name="map" ZoomLevel="10" MaxZoomLevel="21" Center="45.03,41.96" Grid.ColumnSpan="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="79*"/>
+                        <ColumnDefinition Width="21*"/>
+                        <ColumnDefinition Width="694*"/>
+                    </Grid.ColumnDefinitions>
+                    <map:Map x:Name="map" ZoomLevel="10" MaxZoomLevel="21" Center="45.03,41.96" Grid.ColumnSpan="3">
                         <map:MapItemsControl ItemsSource="{Binding Polylines}"/>
 
                         <map:MapItemsControl ItemsSource="{Binding Points}"
@@ -67,14 +74,14 @@
                     </map:Map>
 
                     <m:OutlinedText
-            x:Name="mouseLocation" Margin="0,4,0,0" FontFamily="Consolas"
+            x:Name="mouseLocation" Margin="297,4,0,0" FontFamily="Consolas"
             Background="{Binding Background, ElementName=map}"
             Foreground="{Binding Foreground, ElementName=map}"
-            HorizontalAlignment="Center" VerticalAlignment="Top"
-            IsHitTestVisible="False"/>
+            HorizontalAlignment="Left" VerticalAlignment="Top"
+            IsHitTestVisible="False" Grid.Column="2"/>
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Background="#AFFFFFFF"
-                    DataContext="{Binding MapLayer, ElementName=map}" Grid.ColumnSpan="2">
+                    DataContext="{Binding MapLayer, ElementName=map}" Grid.Column="2">
                         <ProgressBar Width="100" Height="8" Margin="4,2" VerticalAlignment="Center"
                          Maximum="1" Value="{Binding LoadingProgress}">
                             <ProgressBar.Style>
@@ -145,7 +152,15 @@
                     </StackPanel>
                 </Grid>
             </TabItem>
-            <TabItem Header="Телеметрия"></TabItem>
+            <TabItem Header="Телеметрия">
+                <DockPanel>
+                    <TextBlock x:Name="TelemetryTextBlock" 
+                               Text="{Binding TelemetryPacket}"
+                               TextWrapping="Wrap"
+                               HorizontalAlignment="Left"
+                               VerticalAlignment="Top"/>
+                </DockPanel>
+            </TabItem>
         </TabControl>
 
     </DockPanel>

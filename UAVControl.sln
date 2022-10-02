@@ -5,7 +5,13 @@ VisualStudioVersion = 17.2.32802.462
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UAVControl", "UAVControl\UAVControl.csproj", "{BA7678F4-A2FF-4149-BF57-63F1C0C01312}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MapControl.WPF", "..\XAML-Map-Control-master\MapControl\WPF\MapControl.WPF.csproj", "{6DED1DA7-5998-46C0-AC55-F40AB05BD62A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MAVLink", "..\MissionPlanner\ExtLibs\Mavlink\MAVLink.csproj", "{1EFBEFD9-1957-47F0-9E95-545A1694949B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MapControl.WPF", "..\XAML-Map-Control-master\MapControl\WPF\MapControl.WPF.csproj", "{3A1CEA3D-02E4-4CF5-B7D2-67E9FC7CC917}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MissionPlanner.ArduPilot", "..\MissionPlanner\ExtLibs\ArduPilot\MissionPlanner.ArduPilot.csproj", "{E2011C58-86B0-43BA-9574-7BFC84A4BDC1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MissionPlanner.Utilities", "..\MissionPlanner\ExtLibs\Utilities\MissionPlanner.Utilities.csproj", "{45FA625C-0349-495C-A1BF-4D489153A15C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +23,22 @@ Global
 		{BA7678F4-A2FF-4149-BF57-63F1C0C01312}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA7678F4-A2FF-4149-BF57-63F1C0C01312}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA7678F4-A2FF-4149-BF57-63F1C0C01312}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6DED1DA7-5998-46C0-AC55-F40AB05BD62A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6DED1DA7-5998-46C0-AC55-F40AB05BD62A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6DED1DA7-5998-46C0-AC55-F40AB05BD62A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6DED1DA7-5998-46C0-AC55-F40AB05BD62A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1EFBEFD9-1957-47F0-9E95-545A1694949B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EFBEFD9-1957-47F0-9E95-545A1694949B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1EFBEFD9-1957-47F0-9E95-545A1694949B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1EFBEFD9-1957-47F0-9E95-545A1694949B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A1CEA3D-02E4-4CF5-B7D2-67E9FC7CC917}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A1CEA3D-02E4-4CF5-B7D2-67E9FC7CC917}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A1CEA3D-02E4-4CF5-B7D2-67E9FC7CC917}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A1CEA3D-02E4-4CF5-B7D2-67E9FC7CC917}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2011C58-86B0-43BA-9574-7BFC84A4BDC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2011C58-86B0-43BA-9574-7BFC84A4BDC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2011C58-86B0-43BA-9574-7BFC84A4BDC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2011C58-86B0-43BA-9574-7BFC84A4BDC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{45FA625C-0349-495C-A1BF-4D489153A15C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45FA625C-0349-495C-A1BF-4D489153A15C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45FA625C-0349-495C-A1BF-4D489153A15C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45FA625C-0349-495C-A1BF-4D489153A15C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
